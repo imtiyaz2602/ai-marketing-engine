@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+﻿from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
@@ -23,7 +23,7 @@ def get_brand(brand_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Brand not found")
     return brand
 
-@router.get("/brands", response_model=List[BrandOut])  # ← fixed list[BrandOut] to List[BrandOut]
+@router.get("/brands", response_model=List[BrandOut])
 def get_all_brands(db: Session = Depends(get_db)):
     return db.query(Brand).all()
 
@@ -31,18 +31,13 @@ def get_all_brands(db: Session = Depends(get_db)):
 def validate_brand(brand: BrandCreate):
     warnings = []
     if "Playful" in brand.tone and "LinkedIn" in brand.platforms:
-        warnings.append("⚠️ Playful tone may underperform on LinkedIn. Consider Professional or Bold.")
+        warnings.append("Playful tone may underperform on LinkedIn.")
     if "Witty" in brand.tone and "Google Ads" in brand.platforms:
-        warnings.append("⚠️ Witty tone can reduce CTR on Google Ads. Consider Authoritative.")
+        warnings.append("Witty tone can reduce CTR on Google Ads.")
     if not warnings:
-        prompt = f"""
-A brand called '{brand.name}' in the '{brand.industry}' industry 
-is using these tones: {', '.join(brand.tone)} 
-on these platforms: {', '.join(brand.platforms)}.
-In 1-2 sentences, confirm if this is a good match or give one improvement tip.
-"""
+        prompt = f"Brand '{brand.name}' in '{brand.industry}' uses tones: {', '.join(brand.tone)} on {', '.join(brand.platforms)}. In 1-2 sentences give one tip."
         ai_tip = call_claude(prompt)
-        warnings.append(f"✅ {ai_tip.strip()}")
+        warnings.append(ai_tip.strip())
     return {"warnings": warnings}
 
 @router.put("/brand/{brand_id}", response_model=BrandOut)
@@ -63,4 +58,4 @@ def delete_brand(brand_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Brand not found")
     db.delete(db_brand)
     db.commit()
-    return {"message": "Brand deleted successfully"}
+    return {"message": "Brand deleted"}
