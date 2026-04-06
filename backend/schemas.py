@@ -13,8 +13,12 @@ class BrandCreate(BaseModel):
     duration: str
     platforms: List[str]
 
+    class Config:
+        from_attributes = True
+
 class BrandOut(BrandCreate):
     id: int
+
     class Config:
         from_attributes = True
 
