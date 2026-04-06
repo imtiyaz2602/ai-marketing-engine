@@ -14,13 +14,13 @@ class BrandCreate(BaseModel):
     platforms: List[str]
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class BrandOut(BrandCreate):
     id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class ContentRequest(BaseModel):
     topic: str

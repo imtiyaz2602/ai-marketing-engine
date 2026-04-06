@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
 from database import get_db
 from models import Brand
 from schemas import BrandCreate, BrandOut
@@ -22,7 +23,7 @@ def get_brand(brand_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Brand not found")
     return brand
 
-@router.get("/brands", response_model=list[BrandOut])
+@router.get("/brands", response_model=List[BrandOut])  # ← fixed list[BrandOut] to List[BrandOut]
 def get_all_brands(db: Session = Depends(get_db)):
     return db.query(Brand).all()
 
@@ -54,3 +55,12 @@ def update_brand(brand_id: int, brand: BrandCreate, db: Session = Depends(get_db
     db.commit()
     db.refresh(db_brand)
     return db_brand
+
+@router.delete("/brand/{brand_id}")
+def delete_brand(brand_id: int, db: Session = Depends(get_db)):
+    db_brand = db.query(Brand).filter(Brand.id == brand_id).first()
+    if not db_brand:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    db.delete(db_brand)
+    db.commit()
+    return {"message": "Brand deleted successfully"}
